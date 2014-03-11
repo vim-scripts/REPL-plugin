@@ -2,7 +2,7 @@
 "
 " Maintainer:	Thomas Baruchel <baruchel@gmx.com>
 " Last Change:	2014 Mar 11
-" Version:      1.0
+" Version:      1.1
 
 " Copyright (c) 2014 Thomas Baruchel
 "
@@ -86,10 +86,15 @@ function! ReplClose()
 endfunction
 
 function! ReplCmd()
+  set cursorline
+  redraw
   exe '.write! >> ' . b:repl_fifo_in
   let l:tmp = system('echo "' . b:repl_send . '" >> ' . b:repl_fifo_in)
   let l:bn = bufnr('%')           " current buffer number
   let l:tmp = bufwinnr(bufname(b:repl_bufnr))
+  if l:tmp > 0
+    let l:save_cursor = getpos(".")
+  endif
   exe 'buffer! '. b:repl_bufnr
   exe 'silent normal! G'
   exe 'read! cat ' . b:repl_fifo_out
@@ -99,8 +104,13 @@ function! ReplCmd()
     exe 'silent normal! G'
     exe l:tmp2 . "wincmd w"
   endif
-  redraw!
+  redraw
   exe 'buffer! '. l:bn
+  if l:tmp > 0
+    call setpos('.', l:save_cursor)
+  endif
+  set nocursorline
+  redraw
 endfunction
 
 function! ReplNew()
