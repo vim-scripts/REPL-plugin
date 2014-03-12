@@ -2,7 +2,7 @@
 "
 " Maintainer:	Thomas Baruchel <baruchel@gmx.com>
 " Last Change:	2014 Mar 12
-" Version:      1.3
+" Version:      1.4
 
 " Copyright (c) 2014 Thomas Baruchel
 "
@@ -23,16 +23,20 @@
 " LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 " OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 " THE SOFTWARE.
-"
-let g:repl_cmd = '/home/pi/APL/svn/trunk/src/apl --noSV --rawCIN --noColor'
-let g:repl_stop = ')OFF'
-" the g:repl_send variable will be encapsulated in " ... " for 'echo'
-let g:repl_send = "'REPL-VIM'"
-let g:repl_detect = 'REPL-VIM'
 
-map µ :call ReplCmd()<CR>
 
-" Do not edit below
+if !exists('g:repl_cmd')
+  let g:repl_cmd = '/bin/sh'
+endif
+if !exists('g:repl_stop')
+  let g:repl_stop = 'exit'
+endif
+if !exists('g:repl_send')
+  let g:repl_send = 'echo REPL-VIM-INTERNAL-KEY'
+endif
+if !exists('g:repl_detect')
+  let g:repl_detect = 'REPL-VIM-INTERNAL-KEY'
+endif
 
 if exists('loaded_repl') || &cp
     finish
