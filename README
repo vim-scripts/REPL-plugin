@@ -1,17 +1,15 @@
 This is a mirror of http://www.vim.org/scripts/script.php?script_id=4887
 
-This plugin allows the user to open a scratch window with some external REPL interpreter (it has been tested with GNU APL but any interpreter should work). You should map a key (see the beginning of the file) to the ReplCmd() command which sends the current line to the interpreter (input is in your edited buffer, output is in the scratch buffer).
+This plugin allows the user to open a scratch window with some external REPL interpreter (either a shell or some interpreter for any programming language). You should map a key (see the beginning of the file) to the ReplCmd() command which sends the current line to the interpreter (input is in your edited buffer, output is in the scratch buffer).
 
-The plugin uses FIFO special files and won't work under Windows.
+See video: http://cjoint.com/14ma/DCmkCJGRZH7.htm
 
-Since it is a development version, you should edit the source code for configuring your own interpreter, variables, etc.
-The idea is: define the path of your interpreter; define some command which should echo an arbitrary string; define the exact string to be detected (from the previous one). Thus the script will sends this command after each real command, and a parser will wait for the expected string before updating the buffer.
-
+The plugin uses FIFO special files and won't work under Windows. On the other hand, it will run either in terminal mode or in graphical mode (no server callback). It doesn't need embbeded script languages like python either.
 
 For working, just type:
 
   :call ReplNew()
-  then :call ReplCmd() on each line to be executed
+  then :call ReplCmd() on each line to be executed (this should be mapped to some shortcut key)
   :call ReplClose()
 
 Deleting the scratch buffer or the working buffer should close everything also.
