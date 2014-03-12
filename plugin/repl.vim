@@ -2,7 +2,7 @@
 "
 " Maintainer:	Thomas Baruchel <baruchel@gmx.com>
 " Last Change:	2014 Mar 11
-" Version:      1.1
+" Version:      1.2
 
 " Copyright (c) 2014 Thomas Baruchel
 "
@@ -26,6 +26,7 @@
 "
 let g:repl_cmd = '/home/thomas/Téléchargements/GNUAPL/trunk/src/apl --noSV --rawCIN --noColor'
 let g:repl_stop = ')OFF'
+" the g:repl_send variable will be encapsulated in " ... " for 'echo'
 let g:repl_send = "'REPL-VIM'"
 let g:repl_detect = 'REPL-VIM'
 
@@ -48,11 +49,14 @@ function! ReplCloseInternal(n)
   let l:tmp = system('echo "' . b:repl_stop . '" >> ' . b:repl_fifo_in)
   " an empty line should close the 'tail -f' process
   let l:tmp = system('echo "" >> ' . b:repl_fifo_in)
+  " kill the shell process
+  let l:tmp = system('kill -9 ' . b:repl_pid)
   " remove some variables
   let l:tmp = b:repl_bufnr
   unlet! b:repl_bufnr
   unlet! b:repl_stop
   unlet! b:repl_send
+  unlet! b:repl_pid
 
   " I have to think if it is really useful to delete the two FIFOs
   " (because a race condition could occur if they are removed
@@ -92,9 +96,7 @@ function! ReplCmd()
   let l:tmp = system('echo "' . b:repl_send . '" >> ' . b:repl_fifo_in)
   let l:bn = bufnr('%')           " current buffer number
   let l:tmp = bufwinnr(bufname(b:repl_bufnr))
-  if l:tmp > 0
-    let l:save_cursor = getpos(".")
-  endif
+  let l:save_cursor = getpos(".")
   exe 'buffer! '. b:repl_bufnr
   exe 'silent normal! G'
   exe 'read! cat ' . b:repl_fifo_out
@@ -106,9 +108,7 @@ function! ReplCmd()
   endif
   redraw
   exe 'buffer! '. l:bn
-  if l:tmp > 0
-    call setpos('.', l:save_cursor)
-  endif
+  call setpos('.', l:save_cursor)
   set nocursorline
   redraw
 endfunction
@@ -143,12 +143,13 @@ function! ReplNew()
 
   let l:tmp = 'tail -f ' . b:repl_fifo_in
   let l:tmp = l:tmp . ' | ' . g:repl_cmd
-  "let l:tmp = l:tmp . ' | { echo "$$" > ' . b:repl_fifo_out .'; while read -r line;'
   let l:tmp = l:tmp . ' | { while read -r line;'
   let l:tmp = l:tmp . ' do { while [ "$line" != "' . g:repl_detect .'" ];'
   let l:tmp = l:tmp . ' do echo $line; read -r line; done; } > ' . b:repl_fifo_out .';'
   let l:tmp = l:tmp . ' done; } &'
-  let l:tmp = system(l:tmp)
+  let l:tmp = l:tmp . ' echo "$!"'
+  "let l:tmp = l:tmp . ' > ' . b:repl_fifo_in
+  let b:repl_pid = system(l:tmp)
   " send an initial command to be detected
   let l:tmp = system('echo "' . b:repl_send . '" >> ' . b:repl_fifo_in)
 
